@@ -89,7 +89,7 @@ def create_model(config):
   """Create the score model."""
   model_name = config.model.name
   score_model = get_model(model_name)(config)
-  score_model = score_model.to(config.device)
+  score_model = score_model.float().to(config.device)
   return score_model
 
 

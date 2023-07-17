@@ -5,7 +5,7 @@
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
-#     http://www.apache.org/licenses/LICENSE-2.0
+#     http://www.apache.org/licenses/LICENSE-2.0da
 #
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
@@ -15,11 +15,17 @@
 
 # pylint: skip-file
 """Return training and evaluation/test datasets from config files."""
-import jax
+#import jax
 import tensorflow as tf
 import tensorflow_datasets as tfds
 from torch.utils.data import Dataset, DataLoader
 import numpy as np
+
+
+
+
+
+
 
 
 def get_data_scaler(config):
@@ -203,11 +209,28 @@ def get_dataset(config, uniform_dequantization=False, evaluation=False):
 
 from pathlib import Path
 
+
+class MyDataset(Dataset):
+    def __init__(self, data):
+        self.data = data
+        #self.targets = targets
+        #self.transform = transform
+        
+    def __getitem__(self, index):
+        x = self.data[index]
+        #y = self.targets[index]
+        return x
+    
+    def __len__(self):
+        return len(self.data)
+
 class fastmri_knee(Dataset):
   """ Simple pytorch dataset for fastmri knee singlecoil dataset """
   def __init__(self, root, is_complex=False):
     self.root = root
     self.data_list = list(root.glob('*/*.npy'))
+    print(self.data_list)
+
     self.is_complex = is_complex
 
   def __len__(self):
@@ -216,7 +239,7 @@ class fastmri_knee(Dataset):
   def __getitem__(self, idx):
     fname = self.data_list[idx]
     if not self.is_complex:
-      data = np.load(fname)
+      data = np.load(fname).astype(np.float32)
     else:
       data = np.load(fname).astype(np.complex64)
     data = np.expand_dims(data, axis=0)
@@ -290,8 +313,45 @@ def create_dataloader(configs, evaluation=False, sort=True):
       train_dataset = fastmri_knee(Path(configs.data.root) / f'knee_complex_{configs.data.image_size}_train', is_complex=True)
       val_dataset = fastmri_knee_infer(Path(configs.data.root) / f'knee_complex_{configs.data.image_size}_val', is_complex=True)
   else:
-    train_dataset = fastmri_knee(Path(configs.data.root) / f'knee_{configs.data.image_size}_train')
-    val_dataset = fastmri_knee_infer(Path(configs.data.root) / f'knee_{configs.data.image_size}_val', sort=sort)
+   # train_dataset = fastmri_knee(Path(configs.data.root) / f'knee_{configs.data.image_size}_train')
+   # val_dataset = fastmri_knee_infer(Path(configs.data.root) / f'knee_{configs.data.image_size}_val', sort=sort)
+     #print("address")
+    data = (np.load('media/maginput10.npy', allow_pickle=True))
+    # train_dataset = fastmri_knee(Path('/Users/khoshdev/Documents/Visual_Codes/score-MRI/media'))
+    
+    train_dataset = MyDataset(data)
+    val_dataset = MyDataset(data)
+
+    print(type(train_dataset))
+    print(type(val_dataset))
+    #train_dataset = fastmri_knee(Path(configs.data.root) / f'knee_{configs.data.image_size}_train') media/maginput10.npy
+    #train_dataset_X = (np.load('/content/score-MRI/media/train/', allow_pickle=True))
+    #train_dataset_Y = (np.load('/content/score-MRI/media/train/', allow_pickle=True))
+    #tensor_x = torch.Tensor(train_dataset_X)
+    #tensor_y = torch.Tensor(train_dataset_Y)
+    #train_dataset = TensorDataset(tensor_x, tensor_y)
+    #val_dataset_X = (np.load('/content/score-MRI/media/train/', allow_pickle=True))
+    #val_dataset_Y = (np.load('/content/score-MRI/media/train/', allow_pickle=True))
+    #tensorval_x = torch.Tensor(val_dataset_X)
+    #tensorval_y = torch.Tensor(val_dataset_Y)
+    #val_dataset = TensorDataset(tensorval_x, tensorval_y)
+    #val_dataset = fastmri_knee_infer(Path(configs.data.root) / f'knee_{configs.data.image_size}_val', sort=sort)
+  ##train_dataset = torch.stack(train_dataset).to(device)
+  ##val_dataset = torch.stack(val_dataset).to(device)
+  #print((Path(configs.data.root) / f'knee_{configs.data.image_size}_train'))
+
+  
+  #train_dataset = MyDataset(train_dataset_X, train_dataset_Y)
+  #val_dataset = MyDataset(val_dataset_X, val_dataset_Y)
+  #data = (np.load('/content/score-MRI/media/maginput10.npy', allow_pickle=True))
+  #targets = (np.load('/content/score-MRI/media/magoutput10.npy', allow_pickle=True))
+  #data = list(np.random.randint(0, 255, size=(10, 1, 256, 256))) #dims
+  #target = list(np.random.randint(0, 255, size=(10, 1, 256, 256)))
+  #transform = transforms.Compose([transforms.ToTensor()])
+  
+  #train_dataset = (os.path.join('/content/score-MRI/media/','*.npy'))
+  #val_dataset = (os.path.join('/content/score-MRI/media/','*.npy'))
+
 
   train_loader = DataLoader(
     dataset=train_dataset,

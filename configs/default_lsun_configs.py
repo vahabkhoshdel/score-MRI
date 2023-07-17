@@ -34,6 +34,7 @@ def get_default_configs():
   config.eval = evaluate = ml_collections.ConfigDict()
   evaluate.begin_ckpt = 50
   evaluate.end_ckpt = 96
+  print('Vahab testing')
   # evaluate.batch_size = 512
   evaluate.batch_size = 8
   evaluate.enable_sampling = True
@@ -73,6 +74,17 @@ def get_default_configs():
   optim.grad_clip = 1.
 
   config.seed = 42
+
+
+ 
+  print(torch.cuda.is_available())
+  print(torch.backends.mps.is_available())
   config.device = torch.device('cuda:0') if torch.cuda.is_available() else torch.device('cpu')
+  # if torch.backends.mps.is_available():
+    
+  #   config.device = torch.device('mps')
+  # else:
+  #   config.device = torch.device('cpu')
+
 
   return config

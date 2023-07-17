@@ -35,8 +35,8 @@ def get_config():
   # data
   data = config.data
   data.dataset = 'fastmri_knee'
-  data.root = '/media/harry/tomo/fastmri'
-  data.image_size = 320
+  data.root = '/Users/khoshdev/Documents/Visual_Codes/score-MRI/media'
+  data.image_size = 256
   data.is_multi = False
   data.is_complex = False
 

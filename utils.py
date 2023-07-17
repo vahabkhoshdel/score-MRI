@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from fastmri_utils import fft2c_new, ifft2c_new
 from statistics import mean, stdev
-from sigpy.mri import poisson
+#from sigpy.mri import poisson
 
 
 """
@@ -170,9 +170,9 @@ def get_mask(img, size, batch_size, type='gaussian2d', acc_factor=8, center_frac
         # ACS region
         c_from = size // 2 - Nsamp_center // 2
         mask[i, :, :, c_from:c_from+Nsamp_center] = 1
-  elif type == 'poisson':
-    mask = poisson((size, size), accel=acc_factor)
-    mask = torch.from_numpy(mask)
+  # elif type == 'poisson':
+  #   mask = poisson((size, size), accel=acc_factor)
+  #   mask = torch.from_numpy(mask)
   else:
     NotImplementedError(f'Mask type {type} is currently not supported.')
 
@@ -253,6 +253,16 @@ def get_data_inverse_scaler(config):
     return lambda x: x
 
 
+def save_checkpoint(ckpt_dir, state):
+  saved_state = {
+    'optimizer': state['optimizer'].state_dict(),
+    'model': state['model'].state_dict(),
+    'ema': state['ema'].state_dict(),
+    'step': state['step']
+  }
+  torch.save(saved_state, ckpt_dir)
+
+  
 def restore_checkpoint(ckpt_dir, state, device, skip_sigma=False):
   loaded_state = torch.load(ckpt_dir, map_location=device)
   loaded_model_state = loaded_state['model']

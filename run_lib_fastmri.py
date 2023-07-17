@@ -20,13 +20,14 @@ import gc
 import io
 import os
 import time
-
 import numpy as np
 import tensorflow as tf
 import tensorflow_gan as tfgan
 import logging
 # Keep the import below for registering all model definitions
-from models import ddpm, ncsnv2, ncsnpp, unet
+#from models import ddpm, ncsnv2, ncsnpp, unet
+from models import ncsnpp
+
 import losses
 import sampling
 from models import utils as mutils
@@ -74,12 +75,13 @@ def train(config, workdir):
   tf.io.gfile.makedirs(checkpoint_dir)
   tf.io.gfile.makedirs(os.path.dirname(checkpoint_meta_dir))
   # Resume training when intermediate checkpoints are detected
-  state = restore_checkpoint(checkpoint_meta_dir, state, config.device)
+  #state = restore_checkpoint(checkpoint_meta_dir, state, config.device)
   initial_step = int(state['step'])
 
   # Build pytorch dataloader for training
   train_dl, eval_dl = datasets.create_dataloader(config)
   num_data = len(train_dl.dataset)
+
 
   # Create data normalizer and its inverse
   scaler = datasets.get_data_scaler(config)
@@ -123,6 +125,7 @@ def train(config, workdir):
     print('=================================================')
     print(f'Epoch: {epoch}')
     print('=================================================')
+    print(np.shape(train_dl))
 
     for step, batch in enumerate(train_dl, start=1):
       batch = scaler(batch.to(config.device))
